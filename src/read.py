@@ -6,13 +6,8 @@ def read_nasa_vibration_file(path: Path, column_names: List[str]) -> pd.DataFram
     """
     Read one vibration file from the IMS Bearing dataset obtained from NASAs acoustics and vibrations datasets.
     According to its documentation, the channels belong to the following bearings:
-    - Bearing 1: Channel 1 and Channel 2
-    - Bearing 2: Channel 3 and Channel 4
-    - Bearing 3: Channel 5 and Channel 6
-    - Bearing 4: Channel 7 and Channel 8
-
-    The file Recording Interval is every 10 minutes (except the first 43 files were taken every 5 minutes for the
-    1st test)
+    Check the "Readme Document for IMS Bearing Data.pdf" before loading the data since the channel or sensor
+    settings are different depending on the test (1st, 2nd, or 3rd).
 
     :param path: path to the location of the vibration file
     :param column_names: name of the columns to be used. Example:
