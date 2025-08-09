@@ -205,3 +205,8 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+
+# Data
+#  The data files are too big. Hence, it makes sense to not commit them.
+#  The data can be obtained from Kaggle's NASA bearing dataset
+data/
