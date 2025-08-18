@@ -1,10 +1,10 @@
 import unittest
-from src.signals import resolution
+from src.signals import get_resolution
 
 
 class TestSignals(unittest.TestCase):
-    def test_resolution(self) -> None:
+    def test_get_resolution(self) -> None:
         sampling_frequency = 100
         expected_result = 0.01
-        result = resolution(sampling_frequency)
+        result = get_resolution(sampling_frequency)
         self.assertEqual(result, expected_result)
