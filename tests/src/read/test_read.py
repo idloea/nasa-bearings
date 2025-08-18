@@ -16,8 +16,7 @@ class TestRead(unittest.TestCase):
         files_path = Path('tests/src/read/mock_data/mock_folder')
         column_names =  ['channel_1', 'channel_2', 'channel_3', 'channel_4']
         df = read_nasa_vibration_files_in_directory(files_path=files_path, column_names=column_names)
-        self.assertEqual(set(df.columns), set(['file_name'] + column_names))
-        self.assertEqual(df.shape, (40960, 5))
+        self.assertEqual(len(df), 2)
 
     def test_raises_on_empty_directory(self) -> None:
         files_path = Path('tests/src/read/mock_data/empty_folder')

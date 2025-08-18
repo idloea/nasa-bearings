@@ -19,7 +19,7 @@ def read_nasa_vibration_file(file_path: Path, column_names: List[str]) -> pd.Dat
     df.columns = column_names
     return df
 
-def read_nasa_vibration_files_in_directory(files_path: Path, column_names: List[str]) -> pd.DataFrame:
+def read_nasa_vibration_files_in_directory(files_path: Path, column_names: List[str]) -> List[pd.DataFrame]:
     """
     Read all vibration files in a directory and return a DataFrames.
 
@@ -39,4 +39,4 @@ def read_nasa_vibration_files_in_directory(files_path: Path, column_names: List[
         cols = ['file_name'] + [col for col in df.columns if col != 'file_name']
         df = df[cols]    
         dataframes.append(df)
-    return pd.concat(dataframes)
+    return dataframes
