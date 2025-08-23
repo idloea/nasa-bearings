@@ -32,14 +32,17 @@ def read_nasa_vibration_file(file_path: Path, sensors: List[str],
 
     return df
 
-def read_nasa_vibration_files_in_directory(files_path: Path, column_names: List[str],
-                                           signal_resolution: Union[int, float]) -> List[pd.DataFrame]:
+def read_nasa_vibration_files_in_directory(files_path: Path, sensors: List[str],
+                                           signal_resolution: Union[int, float],
+                                           acceptable_sensor_range: Union[float, None]=None) -> List[pd.DataFrame]:
     """
     Read all vibration files in a directory and return a DataFrames.
 
     :param files_path: path to the directory containing the vibration files
-    :param column_names: name of the columns to be used for each DataFrame
+    :param sensors:  name of the channels or sensors to be used. Example:
+    ['channel_1', 'channel_2', 'channel_3', 'channel_4', 'channel_5', 'channel_6', 'channel_7', 'channel_8']
     :param signal_resolution: resolution of the signal in seconds
+    :param acceptable_sensor_range: if provided, sensors with a value range below this threshold will be set to pd.NA
     :return: List of Pandas DataFrames containing the vibration data for different channels or sensors
     """
     list_of_files =  os.listdir(files_path)
@@ -49,8 +52,9 @@ def read_nasa_vibration_files_in_directory(files_path: Path, column_names: List[
     dataframes = []
     for file in list_of_files:
         file_path = files_path.joinpath(file)
-        df = read_nasa_vibration_file(file_path=file_path, sensors=column_names,
-                                      signal_resolution=signal_resolution)
+        df = read_nasa_vibration_file(file_path=file_path, sensors=sensors,
+                                      signal_resolution=signal_resolution,
+                                      acceptable_sensor_range=acceptable_sensor_range)
         df['file_name'] = file
         cols = ['file_name'] + [col for col in df.columns if col != 'file_name']
         df = df[cols]    

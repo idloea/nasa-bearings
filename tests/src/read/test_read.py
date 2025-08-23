@@ -49,16 +49,16 @@ class TestRead(unittest.TestCase):
 
     def test_read_nasa_vibration_files_in_directory(self) -> None:
         files_path = Path('tests/src/read/mock_data/mock_folder')
-        column_names =  ['channel_1', 'channel_2', 'channel_3', 'channel_4']
-        df = read_nasa_vibration_files_in_directory(files_path=files_path, column_names=column_names,
+        sensors =  ['channel_1', 'channel_2', 'channel_3', 'channel_4']
+        df = read_nasa_vibration_files_in_directory(files_path=files_path, sensors=sensors,
                                                     signal_resolution=self.signal_resolution)
         self.assertEqual(len(df), 2)
 
     def test_raises_on_empty_directory(self) -> None:
         files_path = Path('tests/src/read/mock_data/empty_folder')
-        column_names = ['channel_1', 'channel_2', 'channel_3', 'channel_4']
+        sensors = ['channel_1', 'channel_2', 'channel_3', 'channel_4']
         with self.assertRaises(ValueError) as context:
-            read_nasa_vibration_files_in_directory(files_path=files_path, column_names=column_names,
+            read_nasa_vibration_files_in_directory(files_path=files_path, sensors=sensors,
                                                    signal_resolution=self.signal_resolution)
         self.assertIn("No files found in the directory", str(context.exception))
 
