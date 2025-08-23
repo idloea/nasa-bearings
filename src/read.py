@@ -2,9 +2,12 @@ from pathlib import Path
 import pandas as pd
 from typing import List, Union
 import os
+from src.measurements import drop_faulty_sensor_data
 
-def read_nasa_vibration_file(file_path: Path, column_names: List[str],
-                             signal_resolution: Union[int, float]) -> pd.DataFrame:
+
+def read_nasa_vibration_file(file_path: Path, sensors: List[str],
+                             signal_resolution: Union[int, float],
+                             acceptable_sensor_range: Union[float, None]=None) -> pd.DataFrame:
     """
     Read one vibration file from the IMS Bearing dataset obtained from NASAs acoustics and vibrations datasets.
     According to its documentation, the channels belong to the following bearings:
@@ -12,14 +15,21 @@ def read_nasa_vibration_file(file_path: Path, column_names: List[str],
     settings are different depending on the test (1st, 2nd, or 3rd).
 
     :param file_path: path to the location of the vibration file
-    :param column_names: name of the columns to be used. Example:
+    :param sensors: name of the channels or sensors to be used. Example:
     ['channel_1', 'channel_2', 'channel_3', 'channel_4', 'channel_5', 'channel_6', 'channel_7', 'channel_8']
     :param signal_resolution: resolution of the signal in seconds
+    :param acceptable_sensor_range: if provided, sensors with a value range below this threshold will be set to pd.NA
     :return: Pandas DataFrame containing the vibration data for different channels or sensors
     """
-    df = pd.read_csv(file_path, sep='\t', header=None)
-    df.columns = column_names
+    if not file_path.exists():
+        raise FileNotFoundError(f"File not found: {file_path}")
+
+    df = pd.read_csv(file_path, sep='\t', header=None, names=sensors)
     df['measurement_time_in_seconds'] = df.index * signal_resolution
+
+    if acceptable_sensor_range is not None:
+        df = drop_faulty_sensor_data(df=df, sensors=sensors, acceptable_range=acceptable_sensor_range)
+
     return df
 
 def read_nasa_vibration_files_in_directory(files_path: Path, column_names: List[str],
@@ -39,7 +49,7 @@ def read_nasa_vibration_files_in_directory(files_path: Path, column_names: List[
     dataframes = []
     for file in list_of_files:
         file_path = files_path.joinpath(file)
-        df = read_nasa_vibration_file(file_path=file_path, column_names=column_names,
+        df = read_nasa_vibration_file(file_path=file_path, sensors=column_names,
                                       signal_resolution=signal_resolution)
         df['file_name'] = file
         cols = ['file_name'] + [col for col in df.columns if col != 'file_name']
