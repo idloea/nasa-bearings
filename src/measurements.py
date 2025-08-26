@@ -14,5 +14,9 @@ def drop_faulty_sensor_data(df: pd.DataFrame, sensors: List[str],
 
     result_df = df.copy()
     faulty_sensors = [sensor for sensor in sensors if df[sensor].max() - df[sensor].min() < acceptable_range]
-    result_df[faulty_sensors] = pd.NA
+    if faulty_sensors == sensors:
+        result_df = pd.DataFrame()
+    else:
+        result_df[faulty_sensors] = pd.NA
+
     return result_df

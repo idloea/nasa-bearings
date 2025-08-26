@@ -37,22 +37,18 @@ class TestRead(unittest.TestCase):
                                       signal_resolution=self.signal_resolution,
                                       acceptable_sensor_range=acceptable_sensor_range)
         shape = df.shape
-        expected_shape = (20480, 5)
-        expected_column_names = ['channel_1', 'channel_2', 'channel_3', 'channel_4',
-                                 'measurement_time_in_seconds']
+        expected_shape = (0, 0)
         self.assertEqual(expected_shape, shape)
-        self.assertEqual(expected_column_names, df.columns.tolist())
 
-        number_of_total_nan_values = int(df.isna().sum().sum())
-        expected_number_of_total_nan_values = 81920
-        self.assertEqual(expected_number_of_total_nan_values, number_of_total_nan_values)
 
     def test_read_nasa_vibration_files_in_directory(self) -> None:
         files_path = Path('tests/src/read/mock_data/mock_folder')
         sensors =  ['channel_1', 'channel_2', 'channel_3', 'channel_4']
-        df = read_nasa_vibration_files_in_directory(files_path=files_path, sensors=sensors,
-                                                    signal_resolution=self.signal_resolution)
-        self.assertEqual(len(df), 2)
+        acceptable_sensor_range = 0.01
+        df_list = read_nasa_vibration_files_in_directory(files_path=files_path, sensors=sensors,
+                                                         signal_resolution=self.signal_resolution,
+                                                         acceptable_sensor_range=acceptable_sensor_range)
+        self.assertEqual(len(df_list), 2)
 
     def test_raises_on_empty_directory(self) -> None:
         files_path = Path('tests/src/read/mock_data/empty_folder')

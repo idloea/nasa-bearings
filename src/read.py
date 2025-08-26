@@ -3,6 +3,7 @@ import pandas as pd
 from typing import List, Union
 import os
 from src.measurements import drop_faulty_sensor_data
+from loguru import logger
 
 
 def read_nasa_vibration_file(file_path: Path, sensors: List[str],
@@ -55,6 +56,10 @@ def read_nasa_vibration_files_in_directory(files_path: Path, sensors: List[str],
         df = read_nasa_vibration_file(file_path=file_path, sensors=sensors,
                                       signal_resolution=signal_resolution,
                                       acceptable_sensor_range=acceptable_sensor_range)
+        if df.empty:
+            logger.info(f'All sensors in file {file} are faulty for the defined acceptable_sensor_range '
+                        f'of {acceptable_sensor_range}. Skipping this file.')
+            continue
         df['file_name'] = file
         cols = ['file_name'] + [col for col in df.columns if col != 'file_name']
         df = df[cols]    
