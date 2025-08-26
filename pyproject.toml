@@ -5,6 +5,7 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
+    "coverage>=7.10.5",
     "loguru>=0.7.3",
     "pandas>=2.3.1",
 ]
