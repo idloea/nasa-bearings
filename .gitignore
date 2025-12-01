@@ -210,3 +210,4 @@ __marimo__/
 #  The data files are too big. Hence, it makes sense to not commit them.
 #  The data can be obtained from Kaggle's NASA bearing dataset
 data/
+/.vscode/
