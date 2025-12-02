@@ -10,4 +10,6 @@ dependencies = [
     "matplotlib>=3.10.7",
     "pandas>=2.3.3",
     "pip>=25.3",
+    "polars>=1.35.2",
+    "pyarrow>=22.0.0",
 ]
