@@ -1,22 +1,23 @@
 from typing import List
-import pandas as pd
+import polars as pl
 
-def drop_faulty_sensor_data(df: pd.DataFrame, sensors: List[str],
-                            acceptable_range: float) -> pd.DataFrame:
+def drop_faulty_sensor_data(df: pl.DataFrame, sensors: List[str],
+                            acceptable_range: float) -> pl.DataFrame:
     """
-    Set sensor columns to pd.NA if their value range is below the acceptable threshold.
+    Set sensor columns to None if their value range is below the acceptable threshold.
 
     :param df: input DataFrame containing sensor data
     :param sensors: list of sensor column names to check
     :param acceptable_range: minimum required range for sensor values
-    :return: DataFrame with faulty sensor columns set to pd.NA
+    :return: DataFrame with faulty sensor columns set to None
     """
 
-    result_df = df.copy()
+    result_df = df
     faulty_sensors = [sensor for sensor in sensors if df[sensor].max() - df[sensor].min() < acceptable_range]
     if faulty_sensors == sensors:
-        result_df = pd.DataFrame()
+        result_df = pl.DataFrame()
     else:
-        result_df[faulty_sensors] = pd.NA
+        for faulty_sensor in faulty_sensors:
+            result_df = result_df.with_columns(pl.lit(None).alias(faulty_sensor))
 
     return result_df

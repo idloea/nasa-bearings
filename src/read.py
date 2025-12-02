@@ -1,14 +1,14 @@
 from pathlib import Path
-import pandas as pd
 from typing import List, Union
 import os
 from src.measurements import drop_faulty_sensor_data
 from loguru import logger
-
+import polars as pl
+import numpy as np
 
 def read_nasa_vibration_file(file_path: Path, sensors: List[str],
                              signal_resolution: Union[int, float],
-                             acceptable_sensor_range: Union[float, None]=None) -> pd.DataFrame:
+                             acceptable_sensor_range: Union[float, None]=None) -> pl.DataFrame:
     """
     Read one vibration file from the IMS Bearing dataset obtained from NASAs acoustics and vibrations datasets.
     According to its documentation, the channels belong to the following bearings:
@@ -19,15 +19,18 @@ def read_nasa_vibration_file(file_path: Path, sensors: List[str],
     :param sensors: name of the channels or sensors to be used. Example:
     ['channel_1', 'channel_2', 'channel_3', 'channel_4', 'channel_5', 'channel_6', 'channel_7', 'channel_8']
     :param signal_resolution: resolution of the signal in seconds
-    :param acceptable_sensor_range: if provided, sensors with a value range below this threshold will be set to pd.NA
+    :param acceptable_sensor_range: if provided, sensors with a value range below this threshold will be set to None
     :return: Pandas DataFrame containing the vibration data for different channels or sensors
     """
     if not file_path.exists():
         raise FileNotFoundError(f"File not found: {file_path}")
 
-    df = pd.read_csv(file_path, sep='\t', header=None, names=sensors)
-    df['measurement_time_in_seconds'] = df.index * signal_resolution
-
+    df = pl.read_csv(file_path, separator='\t', has_header=False, new_columns=sensors)
+    number_of_data_points = df.shape[0]
+    measurement_duration = signal_resolution * number_of_data_points
+    measurement_time_in_seconds = np.linspace(start=0, stop=measurement_duration, num=number_of_data_points)
+    df = df.with_columns(pl.Series(measurement_time_in_seconds).alias("measurement_time_in_seconds"))
+    
     if acceptable_sensor_range is not None:
         df = drop_faulty_sensor_data(df=df, sensors=sensors, acceptable_range=acceptable_sensor_range)
 
@@ -35,7 +38,7 @@ def read_nasa_vibration_file(file_path: Path, sensors: List[str],
 
 def read_nasa_vibration_files_in_directory(files_path: Path, sensors: List[str],
                                            signal_resolution: Union[int, float],
-                                           acceptable_sensor_range: Union[float, None]=None) -> List[pd.DataFrame]:
+                                           acceptable_sensor_range: Union[float, None]=None) -> List[pl.DataFrame]:
     """
     Read all vibration files in a directory and return a DataFrames.
 
@@ -43,7 +46,7 @@ def read_nasa_vibration_files_in_directory(files_path: Path, sensors: List[str],
     :param sensors:  name of the channels or sensors to be used. Example:
     ['channel_1', 'channel_2', 'channel_3', 'channel_4', 'channel_5', 'channel_6', 'channel_7', 'channel_8']
     :param signal_resolution: resolution of the signal in seconds
-    :param acceptable_sensor_range: if provided, sensors with a value range below this threshold will be set to pd.NA
+    :param acceptable_sensor_range: if provided, sensors with a value range below this threshold will be set to None
     :return: List of Pandas DataFrames containing the vibration data for different channels or sensors
     """
     list_of_files =  os.listdir(files_path)
@@ -56,11 +59,11 @@ def read_nasa_vibration_files_in_directory(files_path: Path, sensors: List[str],
         df = read_nasa_vibration_file(file_path=file_path, sensors=sensors,
                                       signal_resolution=signal_resolution,
                                       acceptable_sensor_range=acceptable_sensor_range)
-        if df.empty:
-            logger.info(f'All sensors in file {file} are faulty for the defined acceptable_sensor_range '
+        if df.is_empty():
+            logger.warning(f'All sensors in file {file} are faulty for the defined acceptable_sensor_range '
                         f'of {acceptable_sensor_range}. Skipping this file.')
             continue
-        df['file_name'] = file
+        df = df.with_columns(pl.lit(file).alias('file_name'))
         cols = ['file_name'] + [col for col in df.columns if col != 'file_name']
         df = df[cols]    
         dataframes.append(df)
