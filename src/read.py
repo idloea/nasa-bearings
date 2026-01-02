@@ -28,8 +28,8 @@ def read_nasa_vibration_file(file_path: Path, sensors: List[str],
     df = pl.read_csv(file_path, separator='\t', has_header=False, new_columns=sensors)
     number_of_data_points = df.shape[0]
     measurement_duration = signal_resolution * number_of_data_points
-    measurement_time_in_seconds = np.linspace(start=0, stop=measurement_duration, num=number_of_data_points)
-    df = df.with_columns(pl.Series(measurement_time_in_seconds).alias("measurement_time_in_seconds"))
+    measurement_time_in_seconds = np.arange(number_of_data_points) * signal_resolution
+    df = df.with_columns(pl.Series("measurement_time_in_seconds", measurement_time_in_seconds))
     
     if acceptable_sensor_range is not None:
         df = drop_faulty_sensor_data(df=df, sensors=sensors, acceptable_range=acceptable_sensor_range)
@@ -50,7 +50,8 @@ def read_nasa_vibration_files_in_directory(files_path: Path, sensors: List[str],
     :return: List of Polars DataFrames containing the vibration data for different channels or sensors
     """
     list_of_files =  os.listdir(files_path)
-    if len(list_of_files) == 0:
+    number_of_files = len(list_of_files)
+    if number_of_files == 0:
         raise ValueError(f"No files found in the directory: {files_path}")
     
     dataframes = []
@@ -67,4 +68,8 @@ def read_nasa_vibration_files_in_directory(files_path: Path, sensors: List[str],
         cols = ['file_name'] + [col for col in df.columns if col != 'file_name']
         df = df[cols]    
         dataframes.append(df)
+    number_of_read_files = len(dataframes)
+    number_of_discarded_files = number_of_files - number_of_read_files
+    logger.info(f'{number_of_discarded_files} files were discarded.') 
+    logger.info(f'{number_of_read_files} files were read successfully.')
     return dataframes
