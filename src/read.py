@@ -20,7 +20,7 @@ def read_nasa_vibration_file(file_path: Path, sensors: List[str],
     ['channel_1', 'channel_2', 'channel_3', 'channel_4', 'channel_5', 'channel_6', 'channel_7', 'channel_8']
     :param signal_resolution: resolution of the signal in seconds
     :param acceptable_sensor_range: if provided, sensors with a value range below this threshold will be set to None
-    :return: Pandas DataFrame containing the vibration data for different channels or sensors
+    :return: Polars DataFrame containing the vibration data for different channels or sensors
     """
     if not file_path.exists():
         raise FileNotFoundError(f"File not found: {file_path}")
@@ -47,7 +47,7 @@ def read_nasa_vibration_files_in_directory(files_path: Path, sensors: List[str],
     ['channel_1', 'channel_2', 'channel_3', 'channel_4', 'channel_5', 'channel_6', 'channel_7', 'channel_8']
     :param signal_resolution: resolution of the signal in seconds
     :param acceptable_sensor_range: if provided, sensors with a value range below this threshold will be set to None
-    :return: List of Pandas DataFrames containing the vibration data for different channels or sensors
+    :return: List of Polars DataFrames containing the vibration data for different channels or sensors
     """
     list_of_files =  os.listdir(files_path)
     if len(list_of_files) == 0:
