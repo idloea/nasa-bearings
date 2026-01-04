@@ -18,7 +18,7 @@ class TestRead(unittest.TestCase):
         expected_column_names = ['channel_1', 'channel_2', 'channel_3', 'channel_4', 'channel_5',
                                  'channel_6', 'channel_7', 'channel_8', 'measurement_time_in_seconds']
         self.assertEqual(expected_shape, shape)
-        self.assertEqual(expected_column_names, df.columns.tolist())
+        self.assertEqual(expected_column_names, df.columns)
 
     def test_read_nasa_vibration_file_raises_on_missing_file(self) -> None:
         file_path = Path('tests/src/read/mock_data/non_existent_file')
