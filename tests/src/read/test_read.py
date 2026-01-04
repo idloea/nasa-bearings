@@ -58,10 +58,9 @@ class TestRead(unittest.TestCase):
         self.assertEqual(len(df_list), 2)
 
     def test_raises_on_empty_directory(self) -> None:
-        files_path = Path('tests/src/read/mock_data/empty_folder')
         sensors = ['channel_1', 'channel_2', 'channel_3', 'channel_4']
         with self.assertRaises(ValueError) as context:
-            read_nasa_vibration_files_in_directory(files_path=files_path, sensors=sensors,
+            read_nasa_vibration_files_in_directory(files_path=self.empty_folder_path, sensors=sensors,
                                                    signal_resolution=self.signal_resolution)
         self.assertIn("No files found in the directory", str(context.exception))
 
