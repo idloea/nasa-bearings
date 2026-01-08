@@ -64,4 +64,74 @@ class TestRead(unittest.TestCase):
                                                    signal_resolution=self.signal_resolution)
         self.assertIn("No files found in the directory", str(context.exception))
 
-    
+    def test_read_nasa_vibration_file_with_time(self) -> None:
+        """Test if the single file reader returns the duration when requested."""
+        file_path = Path('tests/src/read/mock_data/2003.10.22.12.06.24')
+        sensors = ['channel_1', 'channel_2', 'channel_3', 'channel_4',
+                   'channel_5', 'channel_6', 'channel_7', 'channel_8']
+        
+        df, duration = read_nasa_vibration_file(
+            file_path=file_path, 
+            sensors=sensors,
+            signal_resolution=self.signal_resolution,
+            return_time=True
+        )
+        
+        self.assertIsInstance(duration, float)
+        self.assertGreater(duration, 0)
+        self.assertEqual(df.shape[1], 9)
+
+    def test_read_nasa_vibration_files_in_directory_with_time(self) -> None:
+        """Test if the directory reader returns a list of durations."""
+        files_path = Path('tests/src/read/mock_data/mock_folder')
+        sensors = ['channel_1', 'channel_2', 'channel_3', 'channel_4']
+        
+        dfs, durations = read_nasa_vibration_files_in_directory(
+            files_path=files_path, 
+            sensors=sensors,
+            signal_resolution=self.signal_resolution,
+            return_time=True
+        )
+        
+        self.assertEqual(len(dfs), len(durations))
+        self.assertTrue(all(isinstance(t, float) for t in durations))
+
+    def test_read_nasa_vibration_files_column_structure(self) -> None:
+        """Verify that 'file_name' is the first column in the directory reader output."""
+        files_path = Path('tests/src/read/mock_data/mock_folder')
+        sensors = ['channel_1', 'channel_2']
+        
+        df_list = read_nasa_vibration_files_in_directory(
+            files_path=files_path, 
+            sensors=sensors,
+            signal_resolution=self.signal_resolution
+        )
+        
+        for df in df_list:
+            # Check if file_name is the first column
+            self.assertEqual(df.columns[0], 'file_name')
+            # Check if it's populated
+            self.assertFalse(df['file_name'].is_empty())
+
+    def test_read_nasa_vibration_files_skips_faulty(self) -> None:
+        """
+        Verify that files where all sensors are faulty are 
+        skipped (not included in the returned list).
+        """
+        # Note: This assumes 'mock_folder' contains at least one file 
+        # that would be cleared by a high acceptable_sensor_range
+        files_path = Path('tests/src/read/mock_data/mock_folder')
+        sensors = ['channel_1', 'channel_2']
+        
+        # Using an extremely high range to force files to be 'empty' after drop_faulty_sensor_data
+        extreme_range = 9999.0 
+        
+        # We expect a logger warning and the list to be empty if all files are 'faulty'
+        df_list = read_nasa_vibration_files_in_directory(
+            files_path=files_path, 
+            sensors=sensors,
+            signal_resolution=self.signal_resolution,
+            acceptable_sensor_range=extreme_range
+        )
+        
+        self.assertEqual(len(df_list), 0)
