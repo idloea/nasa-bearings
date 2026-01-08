@@ -44,7 +44,8 @@ def read_nasa_vibration_file(file_path: Path, sensors: List[str],
     
     return df
 
-def read_nasa_vibration_files_in_directory(files_path: Path, sensors: List[str],
+def read_nasa_vibration_files_in_directory(files_path: Path, 
+                                           sensors: List[str],
                                            signal_resolution: Union[int, float],
                                            acceptable_sensor_range: Union[float, None]=None,
                                            return_time: bool = False) -> Union[List[pl.DataFrame], Tuple[List[pl.DataFrame], List[float]]]:
