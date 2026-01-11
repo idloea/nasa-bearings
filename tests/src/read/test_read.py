@@ -90,7 +90,7 @@ class TestRead(unittest.TestCase):
             files_path=files_path, 
             sensors=sensors,
             signal_resolution=self.signal_resolution,
-            return_time=True
+            return_file_reading_time=True
         )
         
         self.assertEqual(len(dfs), len(durations))

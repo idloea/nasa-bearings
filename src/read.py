@@ -48,7 +48,7 @@ def read_nasa_vibration_files_in_directory(files_path: Path,
                                            sensors: List[str],
                                            signal_resolution: Union[int, float],
                                            acceptable_sensor_range: Union[float, None]=None,
-                                           return_time: bool = False) -> Union[List[pl.DataFrame], Tuple[List[pl.DataFrame], List[float]]]:
+                                           return_file_reading_time: bool = False) -> Union[List[pl.DataFrame], Tuple[List[pl.DataFrame], List[float]]]:
     """
     Read all vibration files in a directory and return a list of DataFrames.
 
@@ -66,7 +66,7 @@ def read_nasa_vibration_files_in_directory(files_path: Path,
         raise ValueError(f"No files found in the directory: {files_path}")
     
     dataframes = []
-    durations = []
+    file_reading_time = []
     
     for file in list_of_files:
         file_path = files_path.joinpath(file)
@@ -76,10 +76,10 @@ def read_nasa_vibration_files_in_directory(files_path: Path,
             sensors=sensors,
             signal_resolution=signal_resolution,
             acceptable_sensor_range=acceptable_sensor_range,
-            return_time=return_time
+            return_time=return_file_reading_time
         )
 
-        if return_time:
+        if return_file_reading_time:
             df, duration = result
         else:
             df = result
@@ -94,15 +94,15 @@ def read_nasa_vibration_files_in_directory(files_path: Path,
         df = df.select(cols)    
         
         dataframes.append(df)
-        if return_time:
-            durations.append(duration)
+        if return_file_reading_time:
+            file_reading_time.append(duration)
 
     number_of_read_files = len(dataframes)
     number_of_discarded_files = number_of_files - number_of_read_files
     logger.info(f'{number_of_discarded_files} files were discarded.') 
     logger.info(f'{number_of_read_files} files were read successfully.')
     
-    if return_time:
-        return dataframes, durations
+    if return_file_reading_time:
+        return dataframes, file_reading_time
         
     return dataframes
