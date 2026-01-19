@@ -20,10 +20,7 @@ jobs:
         run: uv sync --frozen --all-extras --dev
 
       - name: Run tests with coverage
-
-        run: |
-          uv run coverage run --source=. -m unittest discover .
+        run: uv run coverage run --source=. -m unittest discover .
           
       - name: Check coverage threshold
-
         run: uv run coverage report --fail-under=100
