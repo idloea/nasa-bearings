@@ -15,11 +15,12 @@ jobs:
         uses: astral-sh/setup-uv@v5
         with:
           enable-cache: true
-          # version: "latest" (Optional, will auto-detect from pyproject.toml if specified there)
 
       - name: Install dependencies & Python
-        # uv sync reads pyproject.toml/uv.lock and handles Python installation automatically
         run: uv sync --frozen --all-extras --dev
 
-      - name: Run unittests
-        run: uv run python -m unittest discover .
+      - name: Run tests with coverage
+        run: uv run coverage run --source=. -m unittest discover .
+          
+      - name: Check coverage threshold
+        run: uv run coverage report --fail-under=100
