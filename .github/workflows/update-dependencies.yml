@@ -1,0 +1,34 @@
+name: Update Dependencies
+
+on:
+  schedule:
+    - cron: '0 0 * * 1' # Runs every Monday at midnight
+  workflow_dispatch: # Allows you to run it manually from the Actions tab
+
+jobs:
+  update-deps:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+
+      - name: Set up Python
+        run: uv python install
+
+      - name: Upgrade lockfile
+        # This updates all packages in uv.lock to the latest within your constraints
+        run: uv lock --upgrade
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: "chore: update uv.lock dependencies"
+          title: "🤖 Weekly Dependency Update"
+          body: "This PR was automatically generated to update the `uv.lock` file to the latest compatible versions."
+          branch: "automation/uv-lock-update"
+          delete-branch: true
