@@ -12,6 +12,8 @@ dependencies = [
     "pip>=25.3",
     "polars>=1.35.2",
     "pyarrow>=22.0.0",
+    "pymatreader>=1.1.0",
+    "scipy>=1.17.0",
 ]
 
 [dependency-groups]
