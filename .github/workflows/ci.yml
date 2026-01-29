@@ -38,5 +38,5 @@ jobs:
       - name: Commit and push changes  # Done at the end to avoid unnecessary commits in case of failure
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
-          commit_message: "chore: update uv.lock"
+          commit_message: "Automatic message: uv.lock updated by CI"
           file_pattern: 'uv.lock'
