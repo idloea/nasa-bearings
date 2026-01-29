@@ -39,6 +39,11 @@ Repository for analysing bearing failures from the NASA bearings dataset.
 * Code review
 * Other guidelines
 
+### Docstrings format
+
+* All Python docstrings in this repository follow the NumPy style (use
+    ``Parameters``, ``Returns``, and ``Raises`` sections).
+
 ### Who do I talk to? - WIP ###
 
 * Repo owner or admin
