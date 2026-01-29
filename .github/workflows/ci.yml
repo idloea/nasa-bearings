@@ -5,10 +5,15 @@ on:
     branches: [ "main", "dev" ]
 
 jobs:
-  update-deps:
+  ci:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
 
       - name: Install uv
         uses: astral-sh/setup-uv@v5
@@ -21,22 +26,17 @@ jobs:
       - name: Upgrade lockfile
         run: uv lock --upgrade
 
-  run-tests:
-    runs-on: ubuntu-latest
-    needs: update-deps
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Install uv
-        uses: astral-sh/setup-uv@v5
-        with:
-          enable-cache: true
-
-      - name: Install dependencies & Python
-        run: uv sync --frozen --all-extras --dev
+      - name: Install dependencies
+        run: uv sync --all-extras --dev
 
       - name: Run tests with coverage
         run: uv run coverage run --source=. -m unittest discover .
           
       - name: Check coverage threshold
         run: uv run coverage report --fail-under=100
+
+      - name: Commit and push changes  # Done at the end to avoid unnecessary commits in case of failure
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "chore: update uv.lock"
+          file_pattern: 'uv.lock'
