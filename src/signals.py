@@ -1,5 +1,6 @@
 from typing import Union
 import numpy as np
+from scipy import signal
 
 def calculate_resolution(sampling_frequency: Union[int, float]) -> Union[int, float]:
     """
@@ -53,13 +54,45 @@ def calculate_average_rectified_value(y: np.ndarray) -> float:
 def calculate_shape_factor(y: np.ndarray) -> float:
     """
     Calculates the shape factor of a given input signal.
-    
-    Args:
-        signal (array-like): The input time-series signal.
-        
-    Returns:
-        float: The shape factor value.
+
+    :param y: Array or iterable of signal values
+    :return: Shape factor value of the signal
     """
     rms = calculate_root_mean_square(y=y)
     arv = calculate_average_rectified_value(y=y)
     return rms / arv
+
+def power_spectrum(waveform: np.ndarray, 
+                   sampling_frequency: float,
+                   window=('kaiser', 20),
+                   number_of_points_per_segment: int = 2048,
+                   number_of_overlapping_points_between_segments: int = None) -> tuple:
+
+    """
+    Estimate the power spectral density (PSD) of a time-domain waveform using Welch's method.
+
+    :param waveform: 1-D array of time-domain signal samples.
+    :param sampling_frequency: Sampling frequency of the waveform in Hz.
+    :param window: Window specification passed to ``scipy.signal.welch`` (e.g.
+        ``('kaiser', 20)``). Defaults to ``('kaiser', 20)``.
+    :param number_of_points_per_segment: Number of points per segment (``nperseg``)
+        used by Welch's method. Defaults to ``2048``.
+    :param number_of_overlapping_points_between_segments: Number of points to
+        overlap between segments (``noverlap``). If ``None``, defaults to
+        ``number_of_points_per_segment // 2``.
+    :return: Tuple ``(frequencies, power_spectrum)`` where ``frequencies`` is a
+        1-D NumPy array of frequency bin centers (Hz) and ``power_spectrum`` is
+        the estimated power spectral density for each frequency bin.
+    """
+
+    if number_of_overlapping_points_between_segments is None:
+        number_of_overlapping_points_between_segments = number_of_points_per_segment // 2
+    
+    frequencies, power_spectrum = signal.welch(x=waveform, 
+                                               fs=sampling_frequency, 
+                                               window=window, 
+                                               nperseg=number_of_points_per_segment, 
+                                               noverlap=number_of_overlapping_points_between_segments, 
+                                               scaling='spectrum')
+    
+    return frequencies, power_spectrum
