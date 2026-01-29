@@ -23,6 +23,7 @@ jobs:
 
   run-tests:
     runs-on: ubuntu-latest
+    needs: update-deps
     steps:
       - uses: actions/checkout@v4
 
