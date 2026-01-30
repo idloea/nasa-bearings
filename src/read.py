@@ -12,15 +12,36 @@ def read_nasa_vibration_file(file_path: Path, sensors: List[str],
                              acceptable_sensor_range: Union[float, None]=None,
                              return_time: bool = False) -> Union[pl.DataFrame, Tuple[pl.DataFrame, float]]:
     """
-    Read one vibration file from the IMS Bearing dataset obtained from NASAs acoustics and vibrations datasets.
-    According to its documentation, the channels belong to the following bearings:
-    Check the "Readme Document for IMS Bearing Data.pdf" before loading the data since the channel or sensor
-    settings are different depending on the test (1st, 2nd, or 3rd).
+    Read a single vibration file from the NASA IMS bearing dataset.
 
-    :param file_path: path to the location of the vibration file
-    :param sensors: name of the channels or sensors to be used. Example:
-    ['channel_1', 'channel_2', 'channel_3', 'channel_4', 'channel_5', 'channel_6', 'channel_7', 'channel_8']
-    :param signal_resolution: resolution of the signal in seconds
+    The dataset channels correspond to different bearings depending on the
+    specific test (1st, 2nd or 3rd). Refer to the repository's IMS Bearing
+    README for channel mappings before loading data.
+
+    Parameters
+    ----------
+    file_path : pathlib.Path
+        Path to the vibration file to read.
+    sensors : list[str]
+        Names of channels/sensors to load. Example:
+        ['channel_1', 'channel_2', 'channel_3', 'channel_4',
+         'channel_5', 'channel_6', 'channel_7', 'channel_8']
+    signal_resolution : int or float
+        Resolution of the signal in seconds (sampling interval).
+    acceptable_sensor_range : float or None, optional
+        If provided, sensors with (max - min) below this threshold are
+        considered faulty and removed from the returned DataFrame.
+    return_time : bool, optional
+        If True, return a tuple ``(df, duration)`` where ``duration`` is the
+        time (in seconds) it took to read/process the file.
+
+    Returns
+    -------
+    pl.DataFrame or tuple
+        If ``return_time`` is False, returns a ``pl.DataFrame`` with the
+        measurement data and an added ``measurement_time_in_seconds`` column.
+        If ``return_time`` is True, returns a tuple ``(pl.DataFrame, float)``
+        where the float is the read duration in seconds.
     """
 
     start_time = time.perf_counter()
@@ -52,13 +73,32 @@ def read_nasa_vibration_files_in_directory(files_path: Path,
     """
     Read all vibration files in a directory and return a list of DataFrames.
 
-    :param files_path: path to the directory containing the vibration files
-    :param sensors:  name of the channels or sensors to be used. Example:
-    ['channel_1', 'channel_2', 'channel_3', 'channel_4', 'channel_5', 'channel_6', 'channel_7', 'channel_8']
-    :param signal_resolution: resolution of the signal in seconds
-    :param acceptable_sensor_range: if provided, sensors with a value range below this threshold will be set to None
-    :param return_time: if True, a list of reading times is returned alongside the list of DataFrames
-    :return: List of Polars DataFrames containing the vibration data for different channels or sensors
+    Parameters
+    ----------
+    files_path : pathlib.Path
+        Path to the directory containing the vibration files.
+    sensors : list[str]
+        Names of channels/sensors to load for each file.
+    signal_resolution : int or float
+        Resolution of the signal in seconds (sampling interval).
+    acceptable_sensor_range : float or None, optional
+        If provided, sensors with (max - min) below this threshold are
+        considered faulty and removed from each file's DataFrame.
+    return_file_reading_time : bool, optional
+        If True, return alongside the list of DataFrames a list of file
+        reading durations (in seconds) corresponding to each read file.
+
+    Returns
+    -------
+    list[pl.DataFrame] or tuple
+        If ``return_file_reading_time`` is False, returns a list of Polars
+        DataFrames, one per successfully read file. If True, returns a tuple
+        ``(list_of_dataframes, list_of_durations)``.
+
+    Raises
+    ------
+    ValueError
+        If the provided ``files_path`` directory contains no files.
     """
     list_of_files =  os.listdir(files_path)
     number_of_files = len(list_of_files)

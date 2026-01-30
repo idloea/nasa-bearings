@@ -7,10 +7,21 @@ def drop_faulty_sensor_data(df: pl.DataFrame,
     """
     Drop sensor columns if their value range is below the acceptable threshold.
 
-    :param df: input DataFrame containing sensor data
-    :param sensors: list of sensor column names to check
-    :param acceptable_range: minimum required range for sensor values
-    :return: DataFrame without faulty sensor columns or empty DataFrame if all are faulty
+    Parameters
+    ----------
+    df : pl.DataFrame
+        Input DataFrame containing sensor data.
+    sensors : list[str]
+        List of sensor column names to check.
+    acceptable_range : float
+        Minimum required range for sensor values. Sensors with (max - min)
+        below this threshold are considered faulty and removed.
+
+    Returns
+    -------
+    pl.DataFrame
+        DataFrame without faulty sensor columns. Returns an empty DataFrame
+        if all provided sensors are considered faulty.
     """
     faulty_sensors = [sensor for sensor in sensors if df[sensor].max() - df[sensor].min() < acceptable_range]
 

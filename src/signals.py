@@ -2,64 +2,111 @@ from typing import Union
 import numpy as np
 from scipy import signal
 
-def calculate_resolution(sampling_frequency: Union[int, float]) -> Union[int, float]:
+def resolution(sampling_frequency: Union[int, float]) -> Union[int, float]:
     """
     Calculate the signal resolution in seconds from the sampling frequency.
 
-    :param sampling_frequency: sampling frequency in Hertz
-    :return: signal resolution in seconds
+    Parameters
+    ----------
+    sampling_frequency : int or float
+        Sampling frequency in Hertz.
+
+    Returns
+    -------
+    float
+        Signal resolution in seconds (1 / sampling_frequency).
     """
     return 1 / sampling_frequency
 
-def calculate_root_mean_square(y: np.ndarray) -> float:
+def root_mean_square(y: np.ndarray) -> float:
     """
     Calculate the root mean square (RMS) of a signal.
 
-    :param y: Array or iterable of signal values
-    :return: RMS value of the signal
+    Parameters
+    ----------
+    y : ndarray
+        Array or iterable of signal values.
+
+    Returns
+    -------
+    float
+        RMS value of the signal.
     """
     return np.sqrt(np.mean(y**2))
 
-def calculate_absolute_peak(y: np.ndarray) -> float:
+def absolute_peak(y: np.ndarray) -> float:
     """
     Calculate the peak (maximum absolute value) of a signal.
 
-    :param y: Array or iterable of signal values
-    :return: Peak value of the signal
+    Parameters
+    ----------
+    y : ndarray
+        Array or iterable of signal values.
+
+    Returns
+    -------
+    float
+        Peak (maximum absolute) value of the signal.
     """
     return np.max(np.abs(y))
 
-def calculate_crest_factor(y: np.ndarray) -> float:
+def crest_factor(y: np.ndarray) -> float:
     """
-    Calculates the crest factor of a signal.
+    Calculate the crest factor of a signal.
 
-    :param y: Array or iterable of signal values
-    :return: Crest factor value of the signal
-    """
-    
-    peak = calculate_absolute_peak(y=y)
-    root_mean_square = calculate_root_mean_square(y=y)
-    return peak / root_mean_square
+    The crest factor is the ratio of the peak value to the root mean square (RMS).
 
-def calculate_average_rectified_value(y: np.ndarray) -> float:
+    Parameters
+    ----------
+    y : ndarray
+        Array or iterable of signal values.
+
+    Returns
+    -------
+    float
+        Crest factor value of the signal.
     """
-    Calculates the Average Rectified Value (ARV) of a given input signal.
-    
-    :param y: Array or iterable of signal values
-    :return: Average Rectified Value (ARV) of the signal
+
+    peak = absolute_peak(y=y)
+    rms = root_mean_square(y=y)
+    return peak / rms
+
+def average_rectified_value(y: np.ndarray) -> float:
+    """
+    Calculate the Average Rectified Value (ARV) of a signal.
+
+    Parameters
+    ----------
+    y : ndarray
+        Array or iterable of signal values.
+
+    Returns
+    -------
+    float
+        Average Rectified Value (ARV) of the signal.
     """
 
     return np.mean(np.abs(y))
 
-def calculate_shape_factor(y: np.ndarray) -> float:
+def shape_factor(y: np.ndarray) -> float:
     """
-    Calculates the shape factor of a given input signal.
+    Calculate the shape factor of a signal.
 
-    :param y: Array or iterable of signal values
-    :return: Shape factor value of the signal
+    The shape factor is the ratio of the RMS to the average rectified value (ARV).
+
+    Parameters
+    ----------
+    y : ndarray
+        Array or iterable of signal values.
+
+    Returns
+    -------
+    float
+        Shape factor value of the signal.
     """
-    rms = calculate_root_mean_square(y=y)
-    arv = calculate_average_rectified_value(y=y)
+
+    rms = root_mean_square(y=y)
+    arv = average_rectified_value(y=y)
     return rms / arv
 
 def power_spectrum(waveform: np.ndarray, 
