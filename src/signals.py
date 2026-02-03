@@ -249,3 +249,21 @@ def high_pass_filter(y: np.ndarray,
     filtered_signal = signal.filtfilt(b, a, y)
 
     return filtered_signal
+
+def envelope(y: np.ndarray) -> np.ndarray:
+    """
+    Compute the envelope of a signal using the Hilbert transform.
+
+    Parameters
+    ----------
+    y : ndarray
+        Input signal.
+
+    Returns
+    -------
+    ndarray
+        Envelope of the input signal.
+    """
+    analytic_signal = signal.hilbert(y)
+    envelope_signal = np.abs(analytic_signal)
+    return envelope_signal

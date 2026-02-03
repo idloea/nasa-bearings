@@ -160,4 +160,19 @@ class TestSignals(unittest.TestCase):
         peak_idx = np.argmax(power_spectrum)
         self.assertAlmostEqual(frequencies[peak_idx], f_high, delta=0.5)
         
-    
+    def test_envelope(self) -> None:
+        sampling_frequency = 2000
+        duration = 1.0
+        t = np.arange(0, duration, 1 / sampling_frequency)
+
+        # Amplitude modulation: positive envelope varying between 0.5 and 1.5
+        mod_freq = 5.0
+        carrier_freq = 100.0
+        amplitude_envelope = 1.0 + 0.5 * np.sin(2 * np.pi * mod_freq * t)
+        waveform = amplitude_envelope * np.sin(2 * np.pi * carrier_freq * t)
+
+        env = signals.envelope(waveform)
+
+        # Envelope should match the modulation envelope (within tolerance)
+        np.testing.assert_allclose(env, amplitude_envelope, rtol=1e-2, atol=1e-2)
+        
