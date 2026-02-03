@@ -114,22 +114,31 @@ def power_spectrum(waveform: np.ndarray,
                    window: Union[None, tuple, str] = ('kaiser', 20),
                    number_of_points_per_segment: int = 2048,
                    number_of_overlapping_points_between_segments: int = None) -> tuple:
-
     """
     Estimate the power spectral density (PSD) of a time-domain waveform using Welch's method.
 
-    :param waveform: 1-D array of time-domain signal samples.
-    :param sampling_frequency: Sampling frequency of the waveform in Hz.
-    :param window: Window specification passed to ``scipy.signal.welch`` (e.g.
+    Parameters
+    ----------
+    waveform : 1-D array_like
+        Time-domain signal samples.
+    sampling_frequency : float
+        Sampling frequency of the waveform in Hertz.
+    window : {None, str, tuple}, optional
+        Window specification passed to ``scipy.signal.welch`` (for example
         ``('kaiser', 20)``). Defaults to ``('kaiser', 20)``.
-    :param number_of_points_per_segment: Number of points per segment (``nperseg``)
-        used by Welch's method. Defaults to ``2048``.
-    :param number_of_overlapping_points_between_segments: Number of points to
-        overlap between segments (``noverlap``). If ``None``, defaults to
-        ``number_of_points_per_segment // 2``.
-    :return: Tuple ``(frequencies, power_spectrum)`` where ``frequencies`` is a
-        1-D NumPy array of frequency bin centers (Hz) and ``power_spectrum`` is
-        the estimated power spectral density for each frequency bin.
+    number_of_points_per_segment : int, optional
+        Number of points per segment (``nperseg``) used by Welch's method.
+        Defaults to 2048.
+    number_of_overlapping_points_between_segments : int, optional
+        Number of points to overlap between segments (``noverlap``). If
+        ``None``, defaults to ``number_of_points_per_segment // 2``.
+
+    Returns
+    -------
+    frequencies : ndarray
+        1-D array of frequency bin centers in Hertz.
+    amplitudes : ndarray
+        Estimated power spectral density (spectrum) for each frequency bin.
     """
 
     if number_of_overlapping_points_between_segments is None:
@@ -143,3 +152,100 @@ def power_spectrum(waveform: np.ndarray,
                                            scaling='spectrum')
     
     return frequencies, amplitudes
+
+def band_pass_filter(y: np.ndarray,
+                     sampling_frequency: float,
+                     low_cutoff_frequency: float,
+                     high_cutoff_frequency: float,
+                     filter_order: int = 4) -> np.ndarray:
+    """
+    Apply a Butterworth band-pass filter to a signal.
+
+    Parameters
+    ----------
+    y : ndarray
+        Input signal to be filtered.
+    sampling_frequency : float
+        Sampling frequency of the signal in Hz.
+    low_cutoff_frequency : float
+        Low cutoff frequency of the band-pass filter in Hz.
+    high_cutoff_frequency : float
+        High cutoff frequency of the band-pass filter in Hz.
+    filter_order : int, optional
+        Order of the Butterworth filter. Default is 4.
+
+    Returns
+    -------
+    ndarray
+        Filtered signal.
+    """
+    nyquist_frequency = 0.5 * sampling_frequency
+    low = low_cutoff_frequency / nyquist_frequency
+    high = high_cutoff_frequency / nyquist_frequency
+
+    b, a = signal.butter(filter_order, [low, high], btype='band')
+    filtered_signal = signal.filtfilt(b, a, y)
+
+    return filtered_signal
+
+def low_pass_filter(y: np.ndarray,
+                    sampling_frequency: float,
+                    cutoff_frequency: float,
+                    filter_order: int = 4) -> np.ndarray:
+    """
+    Apply a Butterworth low-pass filter to a signal.
+
+    Parameters
+    ----------
+    y : ndarray
+        Input signal to be filtered.
+    sampling_frequency : float
+        Sampling frequency of the signal in Hz.
+    cutoff_frequency : float
+        Cutoff frequency of the low-pass filter in Hz.
+    filter_order : int, optional
+        Order of the Butterworth filter. Default is 4.
+
+    Returns
+    -------
+    ndarray
+        Filtered signal.
+    """
+    nyquist_frequency = 0.5 * sampling_frequency
+    normal_cutoff = cutoff_frequency / nyquist_frequency
+
+    b, a = signal.butter(filter_order, normal_cutoff, btype='low')
+    filtered_signal = signal.filtfilt(b, a, y)
+
+    return filtered_signal
+
+def high_pass_filter(y: np.ndarray,
+                     sampling_frequency: float,
+                     cutoff_frequency: float,
+                     filter_order: int = 4) -> np.ndarray:
+    """
+    Apply a Butterworth high-pass filter to a signal.
+
+    Parameters
+    ----------
+    y : ndarray
+        Input signal to be filtered.
+    sampling_frequency : float
+        Sampling frequency of the signal in Hz.
+    cutoff_frequency : float
+        Cutoff frequency of the high-pass filter in Hz.
+    filter_order : int, optional
+        Order of the Butterworth filter. Default is 4.
+
+    Returns
+    -------
+    ndarray
+        Filtered signal.
+    """
+    nyquist_frequency = 0.5 * sampling_frequency
+    normal_cutoff = cutoff_frequency / nyquist_frequency
+
+    b, a = signal.butter(filter_order, normal_cutoff, btype='high')
+    filtered_signal = signal.filtfilt(b, a, y)
+
+    return filtered_signal
