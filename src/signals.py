@@ -111,7 +111,7 @@ def shape_factor(y: np.ndarray) -> float:
 
 def power_spectrum(waveform: np.ndarray, 
                    sampling_frequency: float,
-                   window=('kaiser', 20),
+                   window: Union[None, tuple, str] = ('kaiser', 20),
                    number_of_points_per_segment: int = 2048,
                    number_of_overlapping_points_between_segments: int = None) -> tuple:
 
@@ -135,11 +135,11 @@ def power_spectrum(waveform: np.ndarray,
     if number_of_overlapping_points_between_segments is None:
         number_of_overlapping_points_between_segments = number_of_points_per_segment // 2
     
-    frequencies, power_spectrum = signal.welch(x=waveform, 
-                                               fs=sampling_frequency, 
-                                               window=window, 
-                                               nperseg=number_of_points_per_segment, 
-                                               noverlap=number_of_overlapping_points_between_segments, 
-                                               scaling='spectrum')
+    frequencies, amplitudes = signal.welch(x=waveform, 
+                                           fs=sampling_frequency, 
+                                           window=window, 
+                                           nperseg=number_of_points_per_segment, 
+                                           noverlap=number_of_overlapping_points_between_segments, 
+                                           scaling='spectrum')
     
-    return frequencies, power_spectrum
+    return frequencies, amplitudes

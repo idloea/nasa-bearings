@@ -4,6 +4,15 @@ import numpy as np
 
 
 class TestSignals(unittest.TestCase):
+    def setUp(self) -> None:
+        """Set up basic signal parameters for testing."""
+        self.sampling_frequency = 1000.0  # 1 kHz sampling
+        self.duration = 1.0  # 1 second
+        self.t = np.linspace(0, self.duration, int(self.sampling_frequency * self.duration), endpoint=False)
+        # Create a 50Hz sine wave
+        self.freq_target = 50.0
+        self.waveform = np.sin(2 * np.pi * self.freq_target * self.t)    
+
     def test_resolution(self) -> None:
         sampling_frequency = 100
         expected_result = 0.01
@@ -47,3 +56,34 @@ class TestSignals(unittest.TestCase):
         expected_arv = signals.average_rectified_value(y=signal)
         expected_shape_factor = expected_rms / expected_arv
         self.assertAlmostEqual(result, expected_shape_factor)
+
+    def test_power_spectrum_when_number_of_points_per_segment_is_none(self) -> None:
+        number_of_points_per_segment = 512
+        frequencies, amplitudes = signals.power_spectrum(waveform=self.waveform, 
+                                                         sampling_frequency=self.sampling_frequency, 
+                                                         number_of_points_per_segment=number_of_points_per_segment)
+        
+        expected_frequencies = np.array([0., 1.953125, 3.90625, 5.859375, 7.8125])        
+        expected_amplitudes = np.array([8.33031602e-05, 1.03965024e-04, 2.43945161e-05, 1.90974684e-06, 3.82374134e-08])
+        
+        self.assertIsInstance(frequencies, np.ndarray)
+        self.assertIsInstance(amplitudes, np.ndarray)
+        self.assertEqual(len(frequencies), len(amplitudes))
+        self.assertEqual(len(frequencies), (number_of_points_per_segment // 2) + 1)
+        np.testing.assert_almost_equal(frequencies[:5], expected_frequencies)
+        np.testing.assert_almost_equal(amplitudes[:5], expected_amplitudes)
+
+    def test_power_spectrum_when_number_of_points_per_segment_is_not_none(self) -> None:
+        number_of_points_per_segment = 512
+        number_of_overlapping_points_between_segments = 100
+        frequencies, amplitudes = signals.power_spectrum(waveform=self.waveform, 
+                                                         sampling_frequency=self.sampling_frequency, 
+                                                         number_of_points_per_segment=number_of_points_per_segment,
+                                                         number_of_overlapping_points_between_segments=number_of_overlapping_points_between_segments)
+        
+        expected_frequencies = np.array([0., 1.953125, 3.90625, 5.859375, 7.8125])        
+        expected_amplitudes = np.array([1.04022052e-04, 1.29822876e-04, 3.04618397e-05, 2.38473358e-06, 4.77476092e-08])
+        
+        np.testing.assert_almost_equal(frequencies[:5], expected_frequencies)
+        np.testing.assert_almost_equal(amplitudes[:5], expected_amplitudes)
+        
