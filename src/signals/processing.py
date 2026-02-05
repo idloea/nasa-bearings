@@ -4,7 +4,7 @@ import numpy as np
 from scipy import signal as scipy_signal
 
 @dataclass
-class Signal:
+class Signal:  # TODO: does it make sense to have this class here?
     """
     Data structure holding a signal's domain and amplitude values.
 
@@ -115,7 +115,7 @@ def high_pass_filter(signal: Signal,
 
     return Signal(x=signal.x, y=filtered_y)
 
-def envelope(signal: Signal) -> Signal:
+def envelope(signal: Signal, remove_dc_offset: bool = True) -> Signal:
     """
     Compute the envelope of a signal using the Hilbert transform.
 
@@ -123,6 +123,8 @@ def envelope(signal: Signal) -> Signal:
     ----------
     signal : Signal
         Input signal.
+    remove_dc_offset : bool, optional
+        Whether to remove the DC offset from the envelope. Default is True.
 
     Returns
     -------
@@ -131,6 +133,8 @@ def envelope(signal: Signal) -> Signal:
     """
     analytic_signal = scipy_signal.hilbert(signal.y)
     envelope_y = np.abs(analytic_signal)
+    if remove_dc_offset:
+        envelope_y = envelope_y - np.mean(envelope_y)
     return Signal(x=signal.x, y=envelope_y)    
 
 def power_spectrum(signal: Signal, 

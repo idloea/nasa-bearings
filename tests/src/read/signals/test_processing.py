@@ -73,20 +73,30 @@ class TestProcessing(unittest.TestCase):
         y_am = modulation * np.sin(2 * np.pi * carrier_freq * self.t)
         signal_am = Signal(x=self.t, y=y_am)
         
-        env = envelope(signal_am)
+        # Test with DC offset removal (default)
+        env_dc_removed = envelope(signal_am, remove_dc_offset=True)
         
-        self.assertEqual(len(env.x), len(signal_am.x))
-        self.assertTrue(np.all(env.y >= 0))
+        self.assertEqual(len(env_dc_removed.x), len(signal_am.x))
+        # With DC offset removed, the mean should be close to 0
+        self.assertAlmostEqual(np.mean(env_dc_removed.y), 0.0, delta=0.01)
+        # Check that it's dynamic (has variation)
+        self.assertGreater(np.max(env_dc_removed.y) - np.min(env_dc_removed.y), 0.5)
+        
+        # Test without DC offset removal
+        env_no_dc_removal = envelope(signal_am, remove_dc_offset=False)
+        
+        self.assertEqual(len(env_no_dc_removal.x), len(signal_am.x))
+        self.assertTrue(np.all(env_no_dc_removal.y >= 0))
         
         # Check if extracted envelope correlates with modulation signal (ignoring edge effects)
         mid = len(self.t) // 2
         window = slice(mid-100, mid+100)
         
         # Simple check: max envelope should be near max modulation
-        self.assertAlmostEqual(np.max(env.y), 1.5, delta=0.2)
+        self.assertAlmostEqual(np.max(env_no_dc_removal.y), 1.5, delta=0.2)
         # min envelope should be near min modulation (0.5) roughly (hard due to carrier dips)
         # Instead, just checking it's dynamic
-        self.assertGreater(np.max(env.y) - np.min(env.y), 0.5)
+        self.assertGreater(np.max(env_no_dc_removal.y) - np.min(env_no_dc_removal.y), 0.5)
 
 
     def test_power_spectrum(self) -> None:
@@ -120,7 +130,8 @@ class TestProcessing(unittest.TestCase):
                 'high_cutoff_frequency': 120.0
             },
             {
-                'type': 'envelope'
+                'type': 'envelope',
+                'remove_dc_offset': True    
             },
             {
                 'type': 'power_spectrum',
