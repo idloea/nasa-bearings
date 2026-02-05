@@ -176,3 +176,36 @@ class TestSignals(unittest.TestCase):
         # Envelope should match the modulation envelope (within tolerance)
         np.testing.assert_allclose(env, amplitude_envelope, rtol=1e-2, atol=1e-2)
         
+    def test_process_signal(self) -> None:
+        sampling_frequency = 1000
+        duration = 1.024
+        t = np.arange(0, duration, 1 / sampling_frequency)
+        f_pass = 50.0
+        f_stop = 200.0
+        waveform = np.sin(2 * np.pi * f_pass * t) + 0.5 * np.sin(2 * np.pi * f_stop * t)
+
+        filtered = signals.process_signal(
+            waveform,
+            steps=[
+                {
+                    'type': 'band_pass_filter',
+                    'sampling_frequency': sampling_frequency,
+                    'low_cutoff_frequency': 40.0,
+                    'high_cutoff_frequency': 60.0,
+                    'filter_order': 4,
+                },
+                {
+                    'type': 'envelope',
+                    'sampling_frequency': sampling_frequency,
+                },
+            ],
+        )
+
+        frequencies, power_spectrum = signals.power_spectrum(
+            filtered,
+            sampling_frequency=sampling_frequency,
+            number_of_points_per_segment=1024,
+        )
+
+        peak_idx = np.argmax(power_spectrum)
+        self.assertAlmostEqual(frequencies[peak_idx], f_pass, delta=0.5)    
