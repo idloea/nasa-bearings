@@ -115,7 +115,7 @@ def high_pass_filter(signal: Signal,
 
     return Signal(x=signal.x, y=filtered_y)
 
-def envelope(signal: Signal, remove_dc_offset: bool = True) -> Signal:
+def envelope(signal: Signal, remove_dc_offset: bool = False) -> Signal:
     """
     Compute the envelope of a signal using the Hilbert transform.
 
@@ -124,15 +124,14 @@ def envelope(signal: Signal, remove_dc_offset: bool = True) -> Signal:
     signal : Signal
         Input signal.
     remove_dc_offset : bool, optional
-        Whether to remove the DC offset from the envelope. Default is True.
+        If True, remove the DC offset (mean) from the envelope. Default is False.
 
     Returns
     -------
     Signal
         Envelope of the input signal.
     """
-    analytic_signal = scipy_signal.hilbert(signal.y)
-    envelope_y = np.abs(analytic_signal)
+    envelope_y = scipy_signal.envelope(signal.y, residual=None)
     if remove_dc_offset:
         envelope_y = envelope_y - np.mean(envelope_y)
     return Signal(x=signal.x, y=envelope_y)    
